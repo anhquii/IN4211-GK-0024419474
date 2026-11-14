@@ -18,3 +18,15 @@
 Hai vấn đề của lớp `Member` chưa đóng gói:
 1. Các thuộc tính `Id` và `Email` để `public { get; set; }` nên bên ngoài có thể gán hoặc sửa trực tiếp dữ liệu sai quy tắc (như `m.Email = "abc"`).
 2. Constructor `public Member() { }` cho phép khởi tạo đối tượng rỗng không hợp lệ từ bên ngoài (`Id` bị `Guid.Empty`, `Email` chưa có giá trị) mà không qua bước kiểm tra.
+
+
+## Câu 2a
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending : Create()
+    Pending --> Confirmed : Confirm()
+    Pending --> Cancelled : Cancel()
+    Confirmed --> Cancelled : Cancel()
+    Cancelled --> [*]
+```
