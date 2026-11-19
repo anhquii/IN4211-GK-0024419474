@@ -30,3 +30,15 @@ stateDiagram-v2
     Confirmed --> Cancelled : Cancel()
     Cancelled --> [*]
 ```
+
+## Câu 3a
+Ba nguyên lý SOLID mà lớp `EventService` vi phạm:
+1. **S — Single Responsibility Principle: mỗi class làm một việc**
+   - **Dòng vi phạm:** Dòng 6–14 (dòng 6–7 kiểm tra đầu vào; dòng 8–9 thao tác DB; dòng 10 ghi log ra file; dòng 11–14 gửi thông báo).
+   - **Giải thích:** Lớp `EventService` đảm nhiệm quá nhiều việc khác nhau (validate, truy cập CSDL, ghi file log, gửi thông báo), dẫn đến khi một trong các phần này thay đổi đều phải sửa lại lớp.
+2. **O — Open/Closed Principle: thêm mới không sửa cũ**
+   - **Dòng vi phạm:** Dòng 11–14 (`if (channel == "email") ... else if (channel == "sms") ...`).
+   - **Giải thích:** Khi cần bổ sung kênh thông báo mới (ví dụ Slack, Push), phải sửa trực tiếp câu lệnh `if/else if` trong `EventService` thay vì chỉ thêm lớp mới.
+3. **D — Dependency Inversion Principle: dựa vào interface**
+   - **Dòng vi phạm:** Dòng 8 (`new SqlConnection(...)`), dòng 12 (`new EmailSender()`), dòng 14 (`new SmsSender()`).
+   - **Giải thích:** Lớp nghiệp vụ cấp cao `EventService` đang tự `new` và phụ thuộc trực tiếp vào các lớp cụ thể cấp thấp thay vì phụ thuộc vào `interface` (như `IEventRepository`, `INotificationService`) qua Dependency Injection.
