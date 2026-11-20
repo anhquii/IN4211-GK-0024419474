@@ -86,6 +86,17 @@ Project `EduHub.Domain` không được tham chiếu tới `EduHub.Infrastructur
 3. **Khó thay đổi và khó kiểm thử:** Nếu nghiệp vụ bị gắn chặt vào công nghệ lưu trữ cụ thể, khi đổi từ `InMemory` sang `SQL Server / EF Core` sẽ phải sửa cả tầng lõi và không thể viết unit test độc lập cho `Domain`.
 
 
+## Câu 5d
 
+**Nguyên nhân:**
+- Vòng đời **`AddScoped`** tạo ra **một instance `InMemoryEventRepository` mới cho mỗi HTTP request** và hủy nó ngay khi request kết thúc.
+- Vì danh sách `List<Event> _events` là biến thể hiện thông thường (không `static`), dữ liệu được thêm vào trong request `POST` sẽ mất ngay sau khi request đó xong. Đến request `GET` kế tiếp, DI container lại tạo một instance `InMemoryEventRepository` hoàn toàn mới với `_events` rỗng, nên kết quả trả về là danh sách rỗng `[]`.
+
+**Cách đã đăng ký để tránh lỗi:**
+- Trong `EduHub.API/Program.cs`, em đăng ký `InMemoryEventRepository` bằng **`AddSingleton`**:
+  ```csharp
+  builder.Services.AddSingleton<IEventRepository, InMemoryEventRepository>();
+  ```
+- Với `AddSingleton`, toàn bộ ứng dụng chỉ dùng chung **duy nhất một instance** `InMemoryEventRepository` trong suốt thời gian chạy, nên dữ liệu tạo từ `POST` vẫn được giữ nguyên cho các request `GET` / `DELETE` sau đó.
 
 
