@@ -52,3 +52,40 @@ Ba nguyên lý SOLID mà lớp `EventService` vi phạm:
 
 **Khi nào không nên dùng `rebase`:**
 - **Không dùng trên nhánh công khai / nhánh dùng chung đã `push` lên remote** (như `main`, `develop`, hoặc nhánh có người khác đang làm cùng), vì `rebase` viết lại lịch sử (đổi hash commit), buộc phải `push --force` và dễ gây xung đột hoặc mất code của đồng đội.
+
+
+## Câu 5a
+
+Sơ đồ 4 lớp Clean Architecture và chiều phụ thuộc (mũi tên `A --> B` nghĩa là `A` tham chiếu tới `B`, mọi phụ thuộc đều hướng vào lõi `Domain`):
+
+```mermaid
+flowchart TD
+    API["EduHub.API<br/>(EventsController)"]
+    Infra["EduHub.Infrastructure<br/>(InMemoryEventRepository)"]
+    App["EduHub.Application<br/>(EventService)"]
+    Domain["EduHub.Domain<br/>(Event, IEventRepository)"]
+
+    API --> App
+    API --> Infra
+    Infra --> App
+    Infra --> Domain
+    App --> Domain
+```
+
+Vị trí các lớp theo từng project:
+- **`EduHub.Domain`:** `Event`, `IEventRepository` *(không tham chiếu project nào)*
+- **`EduHub.Application`:** `EventService` *(tham chiếu `EduHub.Domain`)*
+- **`EduHub.Infrastructure`:** `InMemoryEventRepository` *(tham chiếu `EduHub.Domain`, `EduHub.Application`)*
+- **`EduHub.API`:** `EventsController` *(tham chiếu `EduHub.Application`, `EduHub.Infrastructure`)*
+
+## Câu 5b
+
+Project `EduHub.Domain` không được tham chiếu tới `EduHub.Infrastructure` vì:
+1. **Vi phạm Quy tắc phụ thuộc (Dependency Rule) và nguyên lý DIP:** `Domain` là tầng lõi chứa quy tắc nghiệp vụ thuần túy, còn `Infrastructure` chứa chi tiết kỹ thuật hạ tầng (CSDL, in-memory, Email/SMS, thư viện ngoài). Tầng ngoài phải phụ thuộc vào tầng trong qua `interface`, không được ngược lại.
+2. **Gây phụ thuộc vòng (Circular Dependency):** `EduHub.Infrastructure` vốn đã tham chiếu `EduHub.Domain` để cài đặt `IEventRepository`; nếu `Domain` tham chiếu ngược lại sẽ lỗi vòng lặp và không biên dịch được.
+3. **Khó thay đổi và khó kiểm thử:** Nếu nghiệp vụ bị gắn chặt vào công nghệ lưu trữ cụ thể, khi đổi từ `InMemory` sang `SQL Server / EF Core` sẽ phải sửa cả tầng lõi và không thể viết unit test độc lập cho `Domain`.
+
+
+
+
+
