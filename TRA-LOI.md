@@ -42,3 +42,13 @@ Ba nguyên lý SOLID mà lớp `EventService` vi phạm:
 3. **D — Dependency Inversion Principle: dựa vào interface**
    - **Dòng vi phạm:** Dòng 8 (`new SqlConnection(...)`), dòng 12 (`new EmailSender()`), dòng 14 (`new SmsSender()`).
    - **Giải thích:** Lớp nghiệp vụ cấp cao `EventService` đang tự `new` và phụ thuộc trực tiếp vào các lớp cụ thể cấp thấp thay vì phụ thuộc vào `interface` (như `IEventRepository`, `INotificationService`) qua Dependency Injection.
+
+
+## Câu 4b
+
+**Phân biệt `git merge` và `git rebase`:**
+- **`git merge`:** Gộp hai nhánh bằng cách tạo thêm một **merge commit** mới (có 2 commit cha), **giữ nguyên** lịch sử phân nhánh và mã hash của các commit cũ.
+- **`git rebase`:** Chuyển các commit của nhánh hiện tại đặt nối tiếp lên đầu nhánh đích, tạo ra các **commit mới với hash mới**, giúp lịch sử commit **thẳng hàng (linear)**, không có merge commit.
+
+**Khi nào không nên dùng `rebase`:**
+- **Không dùng trên nhánh công khai / nhánh dùng chung đã `push` lên remote** (như `main`, `develop`, hoặc nhánh có người khác đang làm cùng), vì `rebase` viết lại lịch sử (đổi hash commit), buộc phải `push --force` và dễ gây xung đột hoặc mất code của đồng đội.
